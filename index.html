@@ -1,490 +1,312 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Task Manager with Petite Vue & Firebase</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            background-color: #f5f7fa;
-            color: #333;
-            line-height: 1.6;
-            padding: 20px;
-            min-height: 100vh;
-        }
-        
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-            overflow: hidden;
-        }
-        
-        header {
-            background: linear-gradient(135deg, #4f6df5 0%, #3a56d5 100%);
-            color: white;
-            padding: 25px 30px;
-            text-align: center;
-        }
-        
-        h1 {
-            font-size: 2.4rem;
-            margin-bottom: 8px;
-        }
-        
-        .subtitle {
-            opacity: 0.9;
-            font-size: 1.1rem;
-        }
-        
-        .app-content {
-            padding: 25px;
-        }
-        
-        .firebase-status {
-            display: flex;
-            align-items: center;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 25px;
-            border-left: 4px solid #4f6df5;
-        }
-        
-        .status-indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            margin-right: 10px;
-        }
-        
-        .connected {
-            background-color: #2ecc71;
-            box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.2);
-        }
-        
-        .disconnected {
-            background-color: #e74c3c;
-            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.2);
-        }
-        
-        .task-form {
-            display: flex;
-            margin-bottom: 30px;
-            gap: 10px;
-        }
-        
-        .task-input {
-            flex-grow: 1;
-            padding: 14px 18px;
-            border: 2px solid #e1e5eb;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.3s;
-        }
-        
-        .task-input:focus {
-            outline: none;
-            border-color: #4f6df5;
-        }
-        
-        .btn {
-            padding: 14px 22px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.95rem;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        
-        .btn-primary {
-            background-color: #4f6df5;
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background-color: #3a56d5;
-            transform: translateY(-2px);
-        }
-        
-        .btn-secondary {
-            background-color: #f1f3f9;
-            color: #4f6df5;
-        }
-        
-        .btn-secondary:hover {
-            background-color: #e4e7f2;
-        }
-        
-        .btn-danger {
-            background-color: #ffeaea;
-            color: #e74c3c;
-        }
-        
-        .btn-danger:hover {
-            background-color: #fad4d4;
-        }
-        
-        .tasks-container {
-            margin-top: 20px;
-        }
-        
-        .section-title {
-            font-size: 1.4rem;
-            margin-bottom: 18px;
-            color: #2d3748;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .section-title i {
-            color: #4f6df5;
-        }
-        
-        .task-list {
-            list-style-type: none;
-        }
-        
-        .task-item {
-            background-color: white;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            padding: 18px;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
-        }
-        
-        .task-item:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-        }
-        
-        .task-item.completed {
-            background-color: #f8fff9;
-            border-color: #c6f6d5;
-            opacity: 0.9;
-        }
-        
-        .task-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            flex-grow: 1;
-        }
-        
-        .task-checkbox {
-            width: 22px;
-            height: 22px;
-            cursor: pointer;
-        }
-        
-        .task-text {
-            font-size: 1.1rem;
-            flex-grow: 1;
-        }
-        
-        .task-text.completed {
-            text-decoration: line-through;
-            color: #718096;
-        }
-        
-        .task-actions {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .task-date {
-            font-size: 0.85rem;
-            color: #a0aec0;
-            margin-top: 5px;
-        }
-        
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: #a0aec0;
-        }
-        
-        .empty-state i {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            opacity: 0.6;
-        }
-        
-        .empty-state p {
-            font-size: 1.1rem;
-        }
-        
-        footer {
-            text-align: center;
-            margin-top: 30px;
-            padding: 20px;
-            color: #718096;
-            font-size: 0.9rem;
-            border-top: 1px solid #e9ecef;
-        }
-        
-        .instructions {
-            background-color: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 30px;
-            font-size: 0.9rem;
-            line-height: 1.5;
-        }
-        
-        .instructions h3 {
-            margin-bottom: 10px;
-            color: #4f6df5;
-        }
-        
-        .instructions ul {
-            padding-left: 20px;
-        }
-        
-        .instructions li {
-            margin-bottom: 8px;
-        }
-        
-        @media (max-width: 600px) {
-            .task-form {
-                flex-direction: column;
-            }
-            
-            .task-item {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 15px;
-            }
-            
-            .task-actions {
-                align-self: flex-end;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container" v-scope="App()" @vue:mounted="mounted">
-        <header>
-            <h1><i class="fas fa-tasks"></i> Task Manager</h1>
-            <p class="subtitle">Built with Petite Vue & Firebase</p>
-        </header>
-        
-        <div class="app-content">
-            <div class="firebase-status">
-                <div class="status-indicator" :class="firebaseConnected ? 'connected' : 'disconnected'"></div>
-                <span v-if="firebaseConnected">Connected to Firebase Realtime Database</span>
-                <span v-else>Connecting to Firebase...</span>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stretching Exercises Guide</title>
+    <script
+      defer
+      src="https://unpkg.com/petite-vue@0.4.1/dist/petite-vue.umd.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto+Slab:wght@300;400;500&display=swap"
+      rel="stylesheet" />
+    <link href="style1.css" rel="stylesheet" type="text/css" media="all" />
+  </head>
+  <body>
+    <div id="app" class="container" v-scope="StretchingApp()">
+      <header>
+        <h1><i class="fas fa-spa"></i> Stretching Exercises Guide</h1>
+        <p class="subtitle">
+          Discover stretching exercises for different body parts to improve
+          flexibility, reduce muscle tension, and enhance overall well-being.
+        </p>
+      </header>
+
+      <div class="controls">
+        <button
+          class="filter-btn"
+          :class="{active: selectedBodyPart === 'all'}"
+          @click="selectedBodyPart = 'all'">
+          <i class="fas fa-dumbbell"></i> All Exercises
+        </button>
+        <button
+          class="filter-btn"
+          :class="{active: selectedBodyPart === 'upper'}"
+          @click="selectedBodyPart = 'upper'">
+          <i class="fas fa-user"></i> Upper Body
+        </button>
+        <button
+          class="filter-btn"
+          :class="{active: selectedBodyPart === 'lower'}"
+          @click="selectedBodyPart = 'lower'">
+          <i class="fas fa-walking"></i> Lower Body
+        </button>
+        <button
+          class="filter-btn"
+          :class="{active: selectedBodyPart === 'full'}"
+          @click="selectedBodyPart = 'full'">
+          <i class="fas fa-user-friends"></i> Full Body
+        </button>
+      </div>
+
+      <div class="exercises-container">
+        <div
+          v-for="exercise in filteredExercises"
+          :key="exercise.id"
+          class="exercise-card">
+          <div class="exercise-image">
+            <i :class="exercise.icon"></i>
+          </div>
+          <div class="exercise-content">
+            <div class="exercise-header">
+              <h3 class="exercise-title">{{ exercise.name }}</h3>
+              <span class="body-part-tag">{{ exercise.bodyPart }}</span>
             </div>
-            
-            <div class="task-form">
-                <input 
-                    type="text" 
-                    class="task-input" 
-                    placeholder="Enter a new task..." 
-                    v-model="newTask"
-                    @keyup.enter="addTask"
-                >
-                <button class="btn btn-primary" @click="addTask">
-                    <i class="fas fa-plus"></i> Add Task
-                </button>
+            <p class="exercise-description">{{ exercise.description }}</p>
+            <div class="exercise-details">
+              <div class="detail-item">
+                <div class="detail-label">Duration</div>
+                <div class="detail-value">{{ exercise.duration }}</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">Difficulty</div>
+                <div class="detail-value">{{ exercise.difficulty }}</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">Repetitions</div>
+                <div class="detail-value">{{ exercise.repetitions }}</div>
+              </div>
             </div>
-            
-            <div class="tasks-container">
-                <h2 class="section-title"><i class="fas fa-list-check"></i> Your Tasks ({{ tasks.length }})</h2>
-                
-                <ul class="task-list">
-                    <li v-for="task in tasks" :key="task.id" class="task-item" :class="{ completed: task.completed }">
-                        <div class="task-info">
-                            <input 
-                                type="checkbox" 
-                                class="task-checkbox" 
-                                :checked="task.completed"
-                                @change="toggleTaskCompletion(task)"
-                            >
-                            <div>
-                                <div class="task-text" :class="{ completed: task.completed }">
-                                    {{ task.text }}
-                                </div>
-                                <div class="task-date">
-                                    <i class="far fa-clock"></i> {{ formatDate(task.createdAt) }}
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="task-actions">
-                            <button class="btn btn-secondary" @click="editTask(task)" title="Edit">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-danger" @click="deleteTask(task)" title="Delete">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </li>
-                </ul>
-                
-                <div v-if="tasks.length === 0" class="empty-state">
-                    <i class="fas fa-clipboard-list"></i>
-                    <p>No tasks yet. Add your first task above!</p>
-                </div>
-            </div>
-            
-            <div class="instructions">
-                <h3><i class="fas fa-info-circle"></i> How This Works</h3>
-                <ul>
-                    <li>This app uses <strong>Petite Vue</strong> for reactive UI components without a build step</li>
-                    <li>Tasks are stored in <strong>Firebase Realtime Database</strong> and sync across devices</li>
-                    <li>Add new tasks using the input field, mark them complete, edit or delete them</li>
-                    <li>All changes are automatically saved to Firebase in real-time</li>
-                    <li>To set up your own Firebase project, see instructions below</li>
-                </ul>
-            </div>
+          </div>
         </div>
-        
-        <footer>
-            <p>Basic HTML Webpage with Petite Vue & Firebase | Tasks are stored in the cloud</p>
-        </footer>
+
+        <div v-if="filteredExercises.length === 0" class="empty-state">
+          <i class="fas fa-search"></i>
+          <h3>No exercises found for the selected filter</h3>
+          <p>
+            Try selecting a different body part to view available exercises.
+          </p>
+        </div>
+      </div>
+
+      <div class="instructions" v-if="selectedExercise">
+        <h2>
+          How to Perform:
+          <span class="selected-exercise">{{ selectedExercise.name }}</span>
+        </h2>
+        <ol class="instructions-list">
+          <li
+            v-for="(step, index) in selectedExercise.instructions"
+            :key="index">
+            {{ step }}
+          </li>
+        </ol>
+        <p><strong>Tips:</strong> {{ selectedExercise.tips }}</p>
+      </div>
+
+      <footer>
+        <p>
+          Stretching Exercises Guide &copy; 2023 | Always consult with a
+          professional before starting new exercise routines
+        </p>
+      </footer>
     </div>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    
-    <!-- Petite Vue -->
-    <script src="https://unpkg.com/petite-vue@0.4.1/dist/petite-vue.iife.js"></script>
-    
     <script>
-        // Firebase configuration (using a public test project)
-        const firebaseConfig = {
-            apiKey: "AIzaSyBQJN3r0CjW3c5Y7g5o6p8XbV9wC0dE1F2G",
-            authDomain: "petite-vue-demo.firebaseapp.com",
-            databaseURL: "https://petite-vue-demo-default-rtdb.firebaseio.com",
-            projectId: "petite-vue-demo",
-            storageBucket: "petite-vue-demo.appspot.com",
-            messagingSenderId: "123456789012",
-            appId: "1:123456789012:web:abcdef1234567890abcdef"
+      const StretchingApp = () => {
+        return {
+          selectedBodyPart: "all",
+          selectedExercise: null,
+
+          exercises: [
+            {
+              id: 1,
+              name: "Neck Stretch",
+              bodyPart: "Upper Body",
+              description:
+                "Gentle stretch to relieve neck tension and improve mobility.",
+              duration: "30 seconds",
+              difficulty: "Beginner",
+              repetitions: "3-5 each side",
+              icon: "fas fa-user",
+              instructions: [
+                "Sit or stand with good posture, shoulders relaxed",
+                "Slowly tilt your head to the right, bringing your ear toward your shoulder",
+                "Hold the stretch for 15-30 seconds",
+                "Return to center and repeat on the left side",
+              ],
+              tips: "Avoid forcing your head down; let gravity do the work. Keep shoulders relaxed throughout.",
+            },
+            {
+              id: 2,
+              name: "Shoulder Stretch",
+              bodyPart: "Upper Body",
+              description:
+                "Stretches the shoulder muscles to improve flexibility and reduce tightness.",
+              duration: "20-30 seconds",
+              difficulty: "Beginner",
+              repetitions: "3-4 each side",
+              icon: "fas fa-hands",
+              instructions: [
+                "Stand or sit with your back straight",
+                "Bring your right arm across your chest",
+                "Use your left hand to gently pull your right arm closer to your chest",
+                "Hold the stretch without bouncing or causing pain",
+                "Repeat on the opposite side",
+              ],
+              tips: "Keep your shoulders relaxed and down away from your ears during the stretch.",
+            },
+            {
+              id: 3,
+              name: "Chest Opener",
+              bodyPart: "Upper Body",
+              description:
+                "Opens up the chest and front shoulder muscles, counteracting hunching posture.",
+              duration: "20-30 seconds",
+              difficulty: "Beginner",
+              repetitions: "3-5",
+              icon: "fas fa-expand-arrows-alt",
+              instructions: [
+                "Stand with feet shoulder-width apart",
+                "Clasp your hands behind your back, palms facing each other",
+                "Gently straighten your arms and lift them away from your body",
+                "Open your chest and squeeze your shoulder blades together",
+                "Hold the position, breathing deeply",
+              ],
+              tips: "If you can't clasp hands, use a towel or resistance band to bridge the gap.",
+            },
+            {
+              id: 4,
+              name: "Hamstring Stretch",
+              bodyPart: "Lower Body",
+              description:
+                "Stretches the back of the thighs to improve flexibility and prevent injury.",
+              duration: "30 seconds",
+              difficulty: "Beginner",
+              repetitions: "2-3 each leg",
+              icon: "fas fa-walking",
+              instructions: [
+                "Sit on the floor with one leg extended straight",
+                "Bend the other leg so the sole of your foot rests against your inner thigh",
+                "Slowly lean forward from your hips toward your extended foot",
+                "Keep your back straight - don't round your spine",
+                "Hold the stretch without bouncing",
+              ],
+              tips: "If you can't reach your foot, use a towel or resistance band around your foot to help.",
+            },
+            {
+              id: 5,
+              name: "Quad Stretch",
+              bodyPart: "Lower Body",
+              description:
+                "Stretches the front of the thigh to improve knee health and running performance.",
+              duration: "20-30 seconds",
+              difficulty: "Beginner",
+              repetitions: "2-3 each leg",
+              icon: "fas fa-running",
+              instructions: [
+                "Stand holding onto a wall or chair for balance",
+                "Bend your right knee, bringing your heel toward your buttock",
+                "Grasp your right foot with your right hand",
+                "Gently pull your foot closer to your buttock until you feel a stretch in the front of your thigh",
+                "Keep your knees close together and your back straight",
+              ],
+              tips: "Avoid arching your back. If you can't reach your foot, use a towel or resistance band.",
+            },
+            {
+              id: 6,
+              name: "Calf Stretch",
+              bodyPart: "Lower Body",
+              description:
+                "Stretches the lower leg muscles to improve ankle mobility and prevent calf tightness.",
+              duration: "30 seconds",
+              difficulty: "Beginner",
+              repetitions: "2-3 each leg",
+              icon: "fas fa-shoe-prints",
+              instructions: [
+                "Stand facing a wall with hands on the wall at shoulder height",
+                "Step one foot back, keeping it straight and heel on the ground",
+                "Bend your front knee while keeping your back leg straight",
+                "Lean forward until you feel a stretch in your calf",
+                "Hold without bouncing",
+              ],
+              tips: "Keep your back heel flat on the ground throughout the stretch for maximum benefit.",
+            },
+            {
+              id: 7,
+              name: "Cat-Cow Stretch",
+              bodyPart: "Full Body",
+              description:
+                "Gentle flow between two poses that stretches the back, neck, and core.",
+              duration: "1-2 minutes",
+              difficulty: "Beginner",
+              repetitions: "10-15 cycles",
+              icon: "fas fa-cat",
+              instructions: [
+                "Start on hands and knees in a tabletop position",
+                "For cow pose: inhale, drop your belly, lift your chin and tailbone",
+                "For cat pose: exhale, round your spine upward, tuck your chin and tailbone",
+                "Flow smoothly between the two poses with your breath",
+                "Continue for 10-15 breath cycles",
+              ],
+              tips: "Move slowly and with control, synchronizing your movement with your breathing.",
+            },
+            {
+              id: 8,
+              name: "Child's Pose",
+              bodyPart: "Full Body",
+              description:
+                "Restorative stretch for the back, hips, and shoulders that promotes relaxation.",
+              duration: "1-3 minutes",
+              difficulty: "Beginner",
+              repetitions: "1-2 times",
+              icon: "fas fa-child",
+              instructions: [
+                "Kneel on the floor with toes together and knees hip-width apart",
+                "Sit back on your heels and fold forward, resting your torso between your thighs",
+                "Extend your arms forward or rest them alongside your body",
+                "Allow your forehead to rest on the floor or a cushion",
+                "Breathe deeply and relax into the stretch",
+              ],
+              tips: "If your hips don't comfortably reach your heels, place a pillow or folded blanket between your thighs and calves.",
+            },
+          ],
+
+          get filteredExercises() {
+            if (this.selectedBodyPart === "all") {
+              return this.exercises;
+            }
+
+            let bodyPartFilter = "";
+            if (this.selectedBodyPart === "upper")
+              bodyPartFilter = "Upper Body";
+            if (this.selectedBodyPart === "lower")
+              bodyPartFilter = "Lower Body";
+            if (this.selectedBodyPart === "full") bodyPartFilter = "Full Body";
+
+            const filtered = this.exercises.filter(
+              (exercise) => exercise.bodyPart === bodyPartFilter
+            );
+
+            // Auto-select first exercise when filtering
+            if (filtered.length > 0) {
+              this.selectedExercise = filtered[0];
+            } else {
+              this.selectedExercise = null;
+            }
+
+            return filtered;
+          },
+
+          mounted() {
+            // Set the first exercise as selected by default
+            this.selectedExercise = this.exercises[0];
+          },
         };
-        
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-        
-        function App() {
-            return {
-                // Reactive state
-                newTask: '',
-                tasks: [],
-                firebaseConnected: false,
-                
-                // Lifecycle hook
-                mounted() {
-                    this.setupFirebase();
-                },
-                
-                // Setup Firebase listeners
-                setupFirebase() {
-                    // Check Firebase connection
-                    const connectedRef = database.ref(".info/connected");
-                    connectedRef.on("value", (snap) => {
-                        this.firebaseConnected = snap.val() === true;
-                    });
-                    
-                    // Listen for tasks from Firebase
-                    const tasksRef = database.ref("tasks");
-                    tasksRef.on("value", (snapshot) => {
-                        const tasksData = snapshot.val();
-                        if (tasksData) {
-                            // Convert Firebase object to array
-                            this.tasks = Object.keys(tasksData).map(key => ({
-                                id: key,
-                                ...tasksData[key]
-                            }));
-                        } else {
-                            this.tasks = [];
-                        }
-                    });
-                },
-                
-                // Add a new task to Firebase
-                addTask() {
-                    if (this.newTask.trim() === '') return;
-                    
-                    const tasksRef = database.ref("tasks");
-                    const newTaskRef = tasksRef.push();
-                    
-                    newTaskRef.set({
-                        text: this.newTask.trim(),
-                        completed: false,
-                        createdAt: Date.now()
-                    });
-                    
-                    this.newTask = '';
-                },
-                
-                // Toggle task completion status
-                toggleTaskCompletion(task) {
-                    const taskRef = database.ref(`tasks/${task.id}`);
-                    taskRef.update({
-                        completed: !task.completed
-                    });
-                },
-                
-                // Delete a task from Firebase
-                deleteTask(task) {
-                    if (confirm("Are you sure you want to delete this task?")) {
-                        const taskRef = database.ref(`tasks/${task.id}`);
-                        taskRef.remove();
-                    }
-                },
-                
-                // Edit a task
-                editTask(task) {
-                    const newText = prompt("Edit task:", task.text);
-                    if (newText !== null && newText.trim() !== '') {
-                        const taskRef = database.ref(`tasks/${task.id}`);
-                        taskRef.update({
-                            text: newText.trim()
-                        });
-                    }
-                },
-                
-                // Format date for display
-                formatDate(timestamp) {
-                    if (!timestamp) return 'Unknown date';
-                    
-                    const date = new Date(timestamp);
-                    return date.toLocaleDateString('en-US', { 
-                        month: 'short', 
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    });
-                }
-            };
-        }
-        
-        // Initialize Petite Vue
-        PetiteVue.createApp().mount();
+      };
     </script>
-</body>
+  </body>
 </html>
