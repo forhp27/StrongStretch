@@ -56,7 +56,9 @@
         <div
           v-for="exercise in filteredExercises"
           :key="exercise.id"
-          class="exercise-card">
+          class="exercise-card"
+          :class="{selected: selectedExercise && selectedExercise.id === exercise.id}"
+          @click="selectExercise(exercise)">
           <div class="exercise-image">
             <i :class="exercise.icon"></i>
           </div>
@@ -116,197 +118,220 @@
     </div>
 
     <script>
-      const StretchingApp = () => {
-        return {
-          selectedBodyPart: "all",
-          selectedExercise: null,
+      // Initialize when DOM is loaded
+      document.addEventListener("DOMContentLoaded", function () {
+        const StretchingApp = () => {
+          return {
+            selectedBodyPart: "all",
+            selectedExercise: null,
 
-          exercises: [
-            {
-              id: 1,
-              name: "Neck Stretch",
-              bodyPart: "Upper Body",
-              description:
-                "Gentle stretch to relieve neck tension and improve mobility.",
-              duration: "30 seconds",
-              difficulty: "Beginner",
-              repetitions: "3-5 each side",
-              icon: "fas fa-user",
-              instructions: [
-                "Sit or stand with good posture, shoulders relaxed",
-                "Slowly tilt your head to the right, bringing your ear toward your shoulder",
-                "Hold the stretch for 15-30 seconds",
-                "Return to center and repeat on the left side",
-              ],
-              tips: "Avoid forcing your head down; let gravity do the work. Keep shoulders relaxed throughout.",
-            },
-            {
-              id: 2,
-              name: "Shoulder Stretch",
-              bodyPart: "Upper Body",
-              description:
-                "Stretches the shoulder muscles to improve flexibility and reduce tightness.",
-              duration: "20-30 seconds",
-              difficulty: "Beginner",
-              repetitions: "3-4 each side",
-              icon: "fas fa-hands",
-              instructions: [
-                "Stand or sit with your back straight",
-                "Bring your right arm across your chest",
-                "Use your left hand to gently pull your right arm closer to your chest",
-                "Hold the stretch without bouncing or causing pain",
-                "Repeat on the opposite side",
-              ],
-              tips: "Keep your shoulders relaxed and down away from your ears during the stretch.",
-            },
-            {
-              id: 3,
-              name: "Chest Opener",
-              bodyPart: "Upper Body",
-              description:
-                "Opens up the chest and front shoulder muscles, counteracting hunching posture.",
-              duration: "20-30 seconds",
-              difficulty: "Beginner",
-              repetitions: "3-5",
-              icon: "fas fa-expand-arrows-alt",
-              instructions: [
-                "Stand with feet shoulder-width apart",
-                "Clasp your hands behind your back, palms facing each other",
-                "Gently straighten your arms and lift them away from your body",
-                "Open your chest and squeeze your shoulder blades together",
-                "Hold the position, breathing deeply",
-              ],
-              tips: "If you can't clasp hands, use a towel or resistance band to bridge the gap.",
-            },
-            {
-              id: 4,
-              name: "Hamstring Stretch",
-              bodyPart: "Lower Body",
-              description:
-                "Stretches the back of the thighs to improve flexibility and prevent injury.",
-              duration: "30 seconds",
-              difficulty: "Beginner",
-              repetitions: "2-3 each leg",
-              icon: "fas fa-walking",
-              instructions: [
-                "Sit on the floor with one leg extended straight",
-                "Bend the other leg so the sole of your foot rests against your inner thigh",
-                "Slowly lean forward from your hips toward your extended foot",
-                "Keep your back straight - don't round your spine",
-                "Hold the stretch without bouncing",
-              ],
-              tips: "If you can't reach your foot, use a towel or resistance band around your foot to help.",
-            },
-            {
-              id: 5,
-              name: "Quad Stretch",
-              bodyPart: "Lower Body",
-              description:
-                "Stretches the front of the thigh to improve knee health and running performance.",
-              duration: "20-30 seconds",
-              difficulty: "Beginner",
-              repetitions: "2-3 each leg",
-              icon: "fas fa-running",
-              instructions: [
-                "Stand holding onto a wall or chair for balance",
-                "Bend your right knee, bringing your heel toward your buttock",
-                "Grasp your right foot with your right hand",
-                "Gently pull your foot closer to your buttock until you feel a stretch in the front of your thigh",
-                "Keep your knees close together and your back straight",
-              ],
-              tips: "Avoid arching your back. If you can't reach your foot, use a towel or resistance band.",
-            },
-            {
-              id: 6,
-              name: "Calf Stretch",
-              bodyPart: "Lower Body",
-              description:
-                "Stretches the lower leg muscles to improve ankle mobility and prevent calf tightness.",
-              duration: "30 seconds",
-              difficulty: "Beginner",
-              repetitions: "2-3 each leg",
-              icon: "fas fa-shoe-prints",
-              instructions: [
-                "Stand facing a wall with hands on the wall at shoulder height",
-                "Step one foot back, keeping it straight and heel on the ground",
-                "Bend your front knee while keeping your back leg straight",
-                "Lean forward until you feel a stretch in your calf",
-                "Hold without bouncing",
-              ],
-              tips: "Keep your back heel flat on the ground throughout the stretch for maximum benefit.",
-            },
-            {
-              id: 7,
-              name: "Cat-Cow Stretch",
-              bodyPart: "Full Body",
-              description:
-                "Gentle flow between two poses that stretches the back, neck, and core.",
-              duration: "1-2 minutes",
-              difficulty: "Beginner",
-              repetitions: "10-15 cycles",
-              icon: "fas fa-cat",
-              instructions: [
-                "Start on hands and knees in a tabletop position",
-                "For cow pose: inhale, drop your belly, lift your chin and tailbone",
-                "For cat pose: exhale, round your spine upward, tuck your chin and tailbone",
-                "Flow smoothly between the two poses with your breath",
-                "Continue for 10-15 breath cycles",
-              ],
-              tips: "Move slowly and with control, synchronizing your movement with your breathing.",
-            },
-            {
-              id: 8,
-              name: "Child's Pose",
-              bodyPart: "Full Body",
-              description:
-                "Restorative stretch for the back, hips, and shoulders that promotes relaxation.",
-              duration: "1-3 minutes",
-              difficulty: "Beginner",
-              repetitions: "1-2 times",
-              icon: "fas fa-child",
-              instructions: [
-                "Kneel on the floor with toes together and knees hip-width apart",
-                "Sit back on your heels and fold forward, resting your torso between your thighs",
-                "Extend your arms forward or rest them alongside your body",
-                "Allow your forehead to rest on the floor or a cushion",
-                "Breathe deeply and relax into the stretch",
-              ],
-              tips: "If your hips don't comfortably reach your heels, place a pillow or folded blanket between your thighs and calves.",
-            },
-          ],
+            exercises: [
+              {
+                id: 1,
+                name: "Neck Stretch",
+                bodyPart: "Upper Body",
+                description:
+                  "Gentle stretch to relieve neck tension and improve mobility.",
+                duration: "30 seconds",
+                difficulty: "Beginner",
+                repetitions: "3-5 each side",
+                icon: "fas fa-user",
+                instructions: [
+                  "Sit or stand with good posture, shoulders relaxed",
+                  "Slowly tilt your head to the right, bringing your ear toward your shoulder",
+                  "Hold the stretch for 15-30 seconds",
+                  "Return to center and repeat on the left side",
+                ],
+                tips: "Avoid forcing your head down; let gravity do the work. Keep shoulders relaxed throughout.",
+              },
+              {
+                id: 2,
+                name: "Shoulder Stretch",
+                bodyPart: "Upper Body",
+                description:
+                  "Stretches the shoulder muscles to improve flexibility and reduce tightness.",
+                duration: "20-30 seconds",
+                difficulty: "Beginner",
+                repetitions: "3-4 each side",
+                icon: "fas fa-hands",
+                instructions: [
+                  "Stand or sit with your back straight",
+                  "Bring your right arm across your chest",
+                  "Use your left hand to gently pull your right arm closer to your chest",
+                  "Hold the stretch without bouncing or causing pain",
+                  "Repeat on the opposite side",
+                ],
+                tips: "Keep your shoulders relaxed and down away from your ears during the stretch.",
+              },
+              {
+                id: 3,
+                name: "Chest Opener",
+                bodyPart: "Upper Body",
+                description:
+                  "Opens up the chest and front shoulder muscles, counteracting hunching posture.",
+                duration: "20-30 seconds",
+                difficulty: "Beginner",
+                repetitions: "3-5",
+                icon: "fas fa-expand-arrows-alt",
+                instructions: [
+                  "Stand with feet shoulder-width apart",
+                  "Clasp your hands behind your back, palms facing each other",
+                  "Gently straighten your arms and lift them away from your body",
+                  "Open your chest and squeeze your shoulder blades together",
+                  "Hold the position, breathing deeply",
+                ],
+                tips: "If you can't clasp hands, use a towel or resistance band to bridge the gap.",
+              },
+              {
+                id: 4,
+                name: "Hamstring Stretch",
+                bodyPart: "Lower Body",
+                description:
+                  "Stretches the back of the thighs to improve flexibility and prevent injury.",
+                duration: "30 seconds",
+                difficulty: "Beginner",
+                repetitions: "2-3 each leg",
+                icon: "fas fa-walking",
+                instructions: [
+                  "Sit on the floor with one leg extended straight",
+                  "Bend the other leg so the sole of your foot rests against your inner thigh",
+                  "Slowly lean forward from your hips toward your extended foot",
+                  "Keep your back straight - don't round your spine",
+                  "Hold the stretch without bouncing",
+                ],
+                tips: "If you can't reach your foot, use a towel or resistance band around your foot to help.",
+              },
+              {
+                id: 5,
+                name: "Quad Stretch",
+                bodyPart: "Lower Body",
+                description:
+                  "Stretches the front of the thigh to improve knee health and running performance.",
+                duration: "20-30 seconds",
+                difficulty: "Beginner",
+                repetitions: "2-3 each leg",
+                icon: "fas fa-running",
+                instructions: [
+                  "Stand holding onto a wall or chair for balance",
+                  "Bend your right knee, bringing your heel toward your buttock",
+                  "Grasp your right foot with your right hand",
+                  "Gently pull your foot closer to your buttock until you feel a stretch in the front of your thigh",
+                  "Keep your knees close together and your back straight",
+                ],
+                tips: "Avoid arching your back. If you can't reach your foot, use a towel or resistance band.",
+              },
+              {
+                id: 6,
+                name: "Calf Stretch",
+                bodyPart: "Lower Body",
+                description:
+                  "Stretches the lower leg muscles to improve ankle mobility and prevent calf tightness.",
+                duration: "30 seconds",
+                difficulty: "Beginner",
+                repetitions: "2-3 each leg",
+                icon: "fas fa-shoe-prints",
+                instructions: [
+                  "Stand facing a wall with hands on the wall at shoulder height",
+                  "Step one foot back, keeping it straight and heel on the ground",
+                  "Bend your front knee while keeping your back leg straight",
+                  "Lean forward until you feel a stretch in your calf",
+                  "Hold without bouncing",
+                ],
+                tips: "Keep your back heel flat on the ground throughout the stretch for maximum benefit.",
+              },
+              {
+                id: 7,
+                name: "Cat-Cow Stretch",
+                bodyPart: "Full Body",
+                description:
+                  "Gentle flow between two poses that stretches the back, neck, and core.",
+                duration: "1-2 minutes",
+                difficulty: "Beginner",
+                repetitions: "10-15 cycles",
+                icon: "fas fa-cat",
+                instructions: [
+                  "Start on hands and knees in a tabletop position",
+                  "For cow pose: inhale, drop your belly, lift your chin and tailbone",
+                  "For cat pose: exhale, round your spine upward, tuck your chin and tailbone",
+                  "Flow smoothly between the two poses with your breath",
+                  "Continue for 10-15 breath cycles",
+                ],
+                tips: "Move slowly and with control, synchronizing your movement with your breathing.",
+              },
+              {
+                id: 8,
+                name: "Child's Pose",
+                bodyPart: "Full Body",
+                description:
+                  "Restorative stretch for the back, hips, and shoulders that promotes relaxation.",
+                duration: "1-3 minutes",
+                difficulty: "Beginner",
+                repetitions: "1-2 times",
+                icon: "fas fa-child",
+                instructions: [
+                  "Kneel on the floor with toes together and knees hip-width apart",
+                  "Sit back on your heels and fold forward, resting your torso between your thighs",
+                  "Extend your arms forward or rest them alongside your body",
+                  "Allow your forehead to rest on the floor or a cushion",
+                  "Breathe deeply and relax into the stretch",
+                ],
+                tips: "If your hips don't comfortably reach your heels, place a pillow or folded blanket between your thighs and calves.",
+              },
+            ],
 
-          get filteredExercises() {
-            if (this.selectedBodyPart === "all") {
-              return this.exercises;
-            }
+            // Method to select an exercise
+            selectExercise(exercise) {
+              this.selectedExercise = exercise;
+            },
 
-            let bodyPartFilter = "";
-            if (this.selectedBodyPart === "upper")
-              bodyPartFilter = "Upper Body";
-            if (this.selectedBodyPart === "lower")
-              bodyPartFilter = "Lower Body";
-            if (this.selectedBodyPart === "full") bodyPartFilter = "Full Body";
+            // Computed property for filtered exercises
+            get filteredExercises() {
+              if (this.selectedBodyPart === "all") {
+                return this.exercises;
+              }
 
-            const filtered = this.exercises.filter(
-              (exercise) => exercise.bodyPart === bodyPartFilter
-            );
+              let bodyPartFilter = "";
+              if (this.selectedBodyPart === "upper")
+                bodyPartFilter = "Upper Body";
+              if (this.selectedBodyPart === "lower")
+                bodyPartFilter = "Lower Body";
+              if (this.selectedBodyPart === "full")
+                bodyPartFilter = "Full Body";
 
-            // Auto-select first exercise when filtering
-            if (filtered.length > 0) {
-              this.selectedExercise = filtered[0];
-            } else {
-              this.selectedExercise = null;
-            }
+              const filtered = this.exercises.filter(
+                (exercise) => exercise.bodyPart === bodyPartFilter
+              );
 
-            return filtered;
-          },
+              // Auto-select first exercise when filtering if none is selected
+              if (filtered.length > 0 && !this.selectedExercise) {
+                this.selectedExercise = filtered[0];
+              }
 
-          mounted() {
-            // Set the first exercise as selected by default
-            this.selectedExercise = this.exercises[0];
-          },
+              return filtered;
+            },
+
+            // Lifecycle hook
+            mounted() {
+              // Set the first exercise as selected by default
+              if (this.exercises.length > 0) {
+                this.selectedExercise = this.exercises[0];
+              }
+              console.log(
+                "Stretching App loaded with",
+                this.exercises.length,
+                "exercises"
+              );
+            },
+          };
         };
-      };
+
+        // Explicitly initialize Petite Vue
+        if (typeof PetiteVue !== "undefined") {
+          PetiteVue.createApp({ StretchingApp }).mount("#app");
+        } else {
+          console.error("PetiteVue is not loaded. Check the script URL.");
+        }
+      });
     </script>
   </body>
 </html>
